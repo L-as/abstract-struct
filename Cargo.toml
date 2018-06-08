@@ -5,9 +5,8 @@ authors = ["Las <las@protonmail.ch>"]
 license = "MPL-2.0"
 
 [dependencies]
-syn = "0.14"
-quote = "0.6"
-proc-macro2 = {version = "*", features = ["nightly"]}
+matches = "0.1"
+itertools = "0.7"
 
 [lib]
 proc-macro = true
