@@ -3,6 +3,10 @@ name = "abstract_struct"
 version = "0.1.0"
 authors = ["Las <las@protonmail.ch>"]
 license = "MPL-2.0"
+readme  = "README.md"
+description = "A procedural macro for hiding generic type parameters and automatically generating a trait for a struct"
+keywords = ["macro", "trait", "generics", "encapsulation"]
+categories = ["development-tools::procedural-macro-helpers"]
 
 [dependencies]
 matches = {version = "0.1.7", git = "https://github.com/Laaas/rust-std-candidates"}
