@@ -1,6 +1,5 @@
 #![feature(proc_macro)]
 #![feature(nll)]
-#![feature(label_break_value)]
 
 extern crate proc_macro;
 extern crate matches;
