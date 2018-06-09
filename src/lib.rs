@@ -165,7 +165,7 @@ fn strip_trait_body(body: Group, type_constraints: &TypeConstraints) -> Group {
 				_ => some!(t)
 			},
 			State::Assoc => match &t {
-				TokenTree::Group(g) if matches!(g.delimiter(), Delimiter::Bracket) => {
+				TokenTree::Group(g) if matches!(g.delimiter(), Delimiter::Brace) => {
 					let ty = unwrap_match!(g.stream().into_iter().next().unwrap(), TokenTree::Ident(i) => i);
 					let s = ty.to_string();
 					type_constraints.0.iter().find(|c| c.name.to_string() == s)
