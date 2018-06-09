@@ -20,7 +20,7 @@ pub struct Simple<A: T<u32, u64>, B, C> where
 	c: C,
 }
 
-trait {
+pub trait {
 	type A: [A] = A;
 	fn a1(&self) -> Self::A {
 		self.a
