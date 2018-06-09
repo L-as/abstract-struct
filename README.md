@@ -18,6 +18,12 @@ and impl blocks, however you will still need to do it in structs.
 
 examples/simple.rs contains an example of this madness, and how this macro abstracts it all away.
 
+## Requirements
+
+You must be using a nightly compiler, since this crate uses
+experimental proc_macro features and also non-lexical lifetimes.
+This is because I am lazy and since this will work in the 2018 epoch anyway.
+
 ## Usage
 
 ```rust
