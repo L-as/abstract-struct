@@ -21,6 +21,13 @@ pub struct Simple<A: T<u32, u64>, B, C> where
 }
 
 trait {
+	type A: [A] = A;
+	fn a1(&self) -> Self::A {
+		self.a
+	}
+	fn a2(&self) -> Self::A {
+		self.a
+	}
 }}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -55,14 +62,18 @@ impl From<u128> for MyC {
 }
 
 // Fucking ugly
-fn take_simple_concrete<A: T<u32, u64>, B, C>(_s: SimpleConcrete<A, B, C>) where
+fn take_simple_concrete<A: T<u32, u64>, B, C>(s: SimpleConcrete<A, B, C>) where
 	A: Clone + Send + Sync + 'static + Copy + PartialEq + Eq + Hash,
 	B: Iterator<Item=u32> + Clone + Into<u64> + Send + Sync + 'static + Copy + PartialEq + Eq + Hash,
 	C: From<u128> + Clone + Send + Sync + 'static + Copy + PartialEq + Eq + Hash,
-{}
+{
+	take_simple(s);
+}
 
 // Absolute masterpiece
-fn take_simple(_s: impl Simple) {}
+fn take_simple(s: impl Simple) {
+	assert!(s.a1() == s.a2());
+}
 
 fn main() {
 	let s = SimpleConcrete {

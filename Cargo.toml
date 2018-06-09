@@ -5,8 +5,9 @@ authors = ["Las <las@protonmail.ch>"]
 license = "MPL-2.0"
 
 [dependencies]
-matches = "0.1"
+matches = {version = "0.1.7", git = "https://github.com/Laaas/rust-std-candidates"}
 itertools = "0.7"
+smallvec = "0.6"
 
 [lib]
 proc-macro = true
