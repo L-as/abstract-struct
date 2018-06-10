@@ -24,6 +24,10 @@ You must be using a nightly compiler, since this crate uses
 experimental proc_macro features and also non-lexical lifetimes.
 This is because I am lazy and since this will work in the 2018 epoch anyway.
 
+## Example
+
+There are thorough examples in the examples directory in the repository.
+
 ## Usage
 
 ```rust
