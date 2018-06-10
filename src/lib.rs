@@ -44,6 +44,7 @@ impl Struct {
 }
 
 struct TypeConstraint {
+	is_lifetime: bool,
 	name: Ident,
 	def: Vec<TokenTree>
 }
@@ -67,8 +68,11 @@ impl TypeConstraints {
 	fn new(tokens: impl Iterator<Item = TokenTree>) -> Self {
 		let v = tokens.batching(|tokens| {
 			loop {
-				let name = match tokens.next()? {
-					TokenTree::Ident(i) => i,
+				let (is_lifetime, name) = match tokens.next()? {
+					TokenTree::Ident(i) => (false, i),
+					TokenTree::Punct(ref p) if p.as_char() == '\'' => {
+						(true, unwrap_match!(tokens.next().unwrap(), TokenTree::Ident(i) => i))
+					},
 					TokenTree::Punct(ref p) if p.as_char() == '<' => {
 						let mut nesting = 1usize;
 						while nesting != 0 {
@@ -87,8 +91,8 @@ impl TypeConstraints {
 				let mut def = Vec::new();
 				match &tokens.next() {
 					Some(TokenTree::Punct(p)) if p.as_char() == ':' => {},
-					Some(TokenTree::Punct(p)) if p.as_char() == ',' => return Some(TypeConstraint {name, def}),
-					None => return Some(TypeConstraint {name, def}),
+					Some(TokenTree::Punct(p)) if p.as_char() == ',' => return Some(TypeConstraint {is_lifetime, name, def}),
+					None => return Some(TypeConstraint {is_lifetime, name, def}),
 					_ => unimplemented!()
 				}
 
@@ -99,7 +103,7 @@ impl TypeConstraints {
 
 				iter_type(tokens, |t| def.push(t), ',');
 
-				return Some(TypeConstraint {name, def})
+				return Some(TypeConstraint {is_lifetime, name, def})
 			}
 		}).collect();
 
@@ -122,6 +126,9 @@ impl TypeConstraints {
 	fn vars(&self) -> Vec<TokenTree> {
 		let mut v = Vec::new();
 		for cons in self.0.iter() {
+			if cons.is_lifetime {
+				v.push(TokenTree::Punct(Punct::new('\'', Spacing::Joint)));
+			}
 			v.push(TokenTree::Ident(cons.name.clone()));
 			v.push(TokenTree::Punct(Punct::new(',', Spacing::Alone)));
 		}
