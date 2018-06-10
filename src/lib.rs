@@ -2,11 +2,11 @@
 #![feature(nll)]
 
 extern crate proc_macro;
-extern crate matches;
+extern crate matches2;
 extern crate itertools;
 extern crate smallvec;
 
-use matches::*;
+use matches2::*;
 use proc_macro::{
 	TokenStream,
 	TokenTree,

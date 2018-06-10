@@ -9,7 +9,7 @@ keywords = ["macro", "trait", "generics", "encapsulation"]
 categories = ["development-tools::procedural-macro-helpers"]
 
 [dependencies]
-matches = {version = "0.1.7", git = "https://github.com/Laaas/rust-std-candidates"}
+matches2 = "1"
 itertools = "0.7"
 smallvec = "0.6"
 
