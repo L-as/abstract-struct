@@ -20,6 +20,15 @@ use itertools::Itertools;
 use std::mem;
 use smallvec::SmallVec;
 
+macro_rules! err {
+	($token:expr, $($msg:tt)*) => {{
+		$token.span().error(format!($($msg)*)).emit();
+		panic!("Errors encountered");
+	}}
+}
+
+const EOIE: &'static str = "Unexpected end of input";
+
 struct Struct {
 	token_pos: usize,
 	def: Vec<TokenTree>,
@@ -31,10 +40,10 @@ impl Struct {
 			TokenTree::Group(g) if matches!(g.delimiter(), Delimiter::Brace) => false,
 			_ => true,
 		}).collect();
-		def.push(iter.next().expect("Unexpected end of input"));
+		def.push(iter.next().expect(EOIE));
 
 		let token_pos = def.iter()
-			.position(|t| matches!(t, TokenTree::Ident(i) if i.to_string() == "struct")).expect("Found not `struct` keyword");
+			.position(|t| matches!(t, TokenTree::Ident(i) if i.to_string() == "struct")).expect("`struct` keyword not found");
 
 		Self {
 			token_pos,
@@ -55,7 +64,7 @@ fn iter_type(tokens: &mut impl Iterator<Item = TokenTree>, mut callback: impl Fn
 	let mut nesting = 0usize;
 	for t in tokens {
 		match &t {
-			TokenTree::Punct(p) if p.as_char() == '>' => nesting = nesting.checked_sub(1).unwrap(),
+			TokenTree::Punct(p) if p.as_char() == '>' => nesting = nesting.checked_sub(1).unwrap_or_else(|| err!(t, "Too many >")),
 			TokenTree::Punct(p) if p.as_char() == '<' => nesting += 1,
 			TokenTree::Punct(p) if p.as_char() == ender && nesting == 0 => break,
 			_ => {},
@@ -71,13 +80,14 @@ impl TypeConstraints {
 				let (is_lifetime, name) = match tokens.next()? {
 					TokenTree::Ident(i) => (false, i),
 					TokenTree::Punct(ref p) if p.as_char() == '\'' => {
-						(true, unwrap_match!(tokens.next().unwrap(), TokenTree::Ident(i) => i))
+						(true, unwrap_match!(tokens.next().expect(EOIE), TokenTree::Ident(i) => i))
 					},
 					TokenTree::Punct(ref p) if p.as_char() == '<' => {
 						let mut nesting = 1usize;
 						while nesting != 0 {
-							match &tokens.next().expect("Unexpected end of input") {
-								TokenTree::Punct(p) if p.as_char() == '>' => nesting = nesting.checked_sub(1).expect("Too many >"),
+							let t = tokens.next().expect(EOIE);
+							match &t {
+								TokenTree::Punct(p) if p.as_char() == '>' => nesting = nesting.checked_sub(1).unwrap_or_else(|| err!(t, "Too many >")),
 								TokenTree::Punct(p) if p.as_char() == '<' => nesting += 1,
 								_ => {},
 							}
@@ -96,7 +106,7 @@ impl TypeConstraints {
 					_ => unimplemented!()
 				}
 
-				match tokens.next().unwrap() {
+				match tokens.next().expect(EOIE) {
 					TokenTree::Punct(ref p) if p.as_char() == ':' => {iter_type(tokens, |_| (), ','); continue},
 					t => def.push(t),
 				}
@@ -173,10 +183,10 @@ fn strip_trait_body(body: Group, type_constraints: &TypeConstraints) -> Group {
 			},
 			State::Assoc => match &t {
 				TokenTree::Group(g) if matches!(g.delimiter(), Delimiter::Brace) => {
-					let ty = unwrap_match!(g.stream().into_iter().next().unwrap(), TokenTree::Ident(i) => i);
+					let ty = unwrap_match!(g.stream().into_iter().next().unwrap_or_else(|| err!(t, "No type specified")), TokenTree::Ident(i) => i);
 					let s = ty.to_string();
 					type_constraints.0.iter().find(|c| c.name.to_string() == s)
-						.unwrap_or_else(|| {ty.span().error("not found").emit(); panic!()})
+						.unwrap_or_else(|| err!(ty, "Type not a generic parameter"))
 						.def
 						.clone()
 						.into()
@@ -276,12 +286,12 @@ pub fn abstract_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 		Some(TokenTree::Ident(last)) if last.to_string() == "unsafe" => true,
 		_ => false,
 	};
-	let trait_token = iter.next().unwrap();
+	let trait_token = iter.next().expect(EOIE);
 	let trait_token_span = trait_token.span();
 	trait_def.push(trait_token);
 	trait_def.push(TokenTree::Ident(trait_name.clone()));
 
-	let trait_body = unwrap_match!(iter.next().unwrap(), TokenTree::Group(g) => g);
+	let trait_body = unwrap_match!(iter.next().expect(EOIE), TokenTree::Group(g) => g);
 	let trait_impl_body = trait_body.clone();
 
 	let trait_body = strip_trait_body(trait_body, &type_constraints);
