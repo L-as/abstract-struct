@@ -30,7 +30,7 @@ There are thorough examples in the examples directory in the repository.
 
 ## Usage
 
-```rust
+```ignore
 abstract_struct! {
 #[all_attribs_in_the_world]
 pub struct MyAwesomeStruct<T, U, V> where

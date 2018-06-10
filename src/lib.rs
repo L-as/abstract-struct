@@ -1,5 +1,8 @@
 #![feature(proc_macro)]
 #![feature(nll)]
+#![feature(external_doc)]
+
+#![doc(include = "../README.md")]
 
 extern crate proc_macro;
 extern crate matches2;
