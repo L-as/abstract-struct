@@ -1,5 +1,5 @@
 [package]
-name        = "abstract_struct"
+name        = "abstract-struct"
 version     = "0.1.0"
 authors     = ["Las <las@protonmail.ch>"]
 license     = "MPL-2.0"
