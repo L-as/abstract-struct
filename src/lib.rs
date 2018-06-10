@@ -95,7 +95,7 @@ impl TypeConstraints {
 						iter_type(tokens, |_| {}, ',');
 						continue
 					},
-					_ => unimplemented!()
+					t => err!(t, "Expected a `'` or a `<` or an identifier")
 				};
 
 				let mut def = Vec::new();
@@ -103,7 +103,7 @@ impl TypeConstraints {
 					Some(TokenTree::Punct(p)) if p.as_char() == ':' => {},
 					Some(TokenTree::Punct(p)) if p.as_char() == ',' => return Some(TypeConstraint {is_lifetime, name, def}),
 					None => return Some(TypeConstraint {is_lifetime, name, def}),
-					_ => unimplemented!()
+					Some(t) => err!(t, "Expected a `:` or a `,` or nothing")
 				}
 
 				match tokens.next().expect(EOIE) {
