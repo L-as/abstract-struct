@@ -23,7 +23,7 @@ pub struct Simple<'a, 'b: 'a, A: T<u32, u64>, B, C> where
 	_phantom_b: PhantomData<&'b u32>,
 }
 
-pub trait {
+pub unsafe trait {
 	type A: {A} = A;
 	fn a1(&self) -> Self::A {
 		self.a

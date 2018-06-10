@@ -272,6 +272,10 @@ pub fn abstract_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 		TokenTree::Ident(i) => i.to_string() != "trait",
 		_ => true,
 	}).collect();
+	let is_unsafe = match trait_def.last() {
+		Some(TokenTree::Ident(last)) if last.to_string() == "unsafe" => true,
+		_ => false,
+	};
 	let trait_token = iter.next().unwrap();
 	let trait_token_span = trait_token.span();
 	trait_def.push(trait_token);
@@ -285,7 +289,11 @@ pub fn abstract_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
 	trait_def.push(TokenTree::Group(trait_body));
 
-	let mut trait_impl = vec![TokenTree::Ident(Ident::new("impl", trait_token_span))];
+	let mut trait_impl = Vec::new();
+	if is_unsafe {
+		trait_impl.push(trait_def[trait_def.len()-4].clone());
+	}
+	trait_impl.push(TokenTree::Ident(Ident::new("impl", trait_token_span)));
 	if let Some(generics) = generics {
 		trait_impl.push(TokenTree::Punct(Punct::new('<', Spacing::Alone)));
 		trait_impl.extend(generics.iter().cloned());
