@@ -251,6 +251,7 @@ fn strip_trait_impl_body(body: Group) -> Group {
 	new_body
 }
 
+/// The main macro, check out the README for more information.
 #[proc_macro]
 pub fn abstract_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input: TokenStream = input.into();
@@ -326,6 +327,13 @@ pub fn abstract_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 		.chain(trait_def)
 		.chain(trait_impl)
 		.collect();
-	println!("result: {}", stream);
 	stream
+}
+
+/// This macro prints the result to stdout before giving it to rustc
+#[proc_macro]
+pub fn abstract_struct_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let output = abstract_struct(input);
+	println!("result: {}", output);
+	output
 }
