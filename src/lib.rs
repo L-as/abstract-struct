@@ -286,15 +286,17 @@ pub fn abstract_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 		TokenTree::Ident(i) => i.to_string() != "trait",
 		_ => true,
 	}).collect();
-	let is_unsafe = match trait_def.last() {
-		Some(TokenTree::Ident(last)) if last.to_string() == "unsafe" => true,
-		_ => false,
+	let unsafe_token_pos = match trait_def.last() {
+		Some(TokenTree::Ident(last)) if last.to_string() == "unsafe" => Some(trait_def.len() - 1),
+		_ => None,
 	};
 	let trait_token = iter.next().expect(EOIE);
 	let trait_token_span = trait_token.span();
 	trait_def.push(trait_token);
 	trait_def.push(TokenTree::Ident(trait_name.clone()));
-
+	trait_def.extend(iter.take_while_ref(|t| {
+		!matches!(t, TokenTree::Group(g) if matches!(g.delimiter(), Delimiter::Brace))
+	}));
 	let trait_body = unwrap_match!(iter.next().expect(EOIE), TokenTree::Group(g) => g);
 	let trait_impl_body = trait_body.clone();
 
@@ -304,8 +306,8 @@ pub fn abstract_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 	trait_def.push(TokenTree::Group(trait_body));
 
 	let mut trait_impl = Vec::new();
-	if is_unsafe {
-		trait_impl.push(trait_def[trait_def.len()-4].clone());
+	if let Some(unsafe_token_pos) = unsafe_token_pos {
+		trait_impl.push(trait_def[unsafe_token_pos].clone());
 	}
 	trait_impl.push(TokenTree::Ident(Ident::new("impl", trait_token_span)));
 	if let Some(generics) = generics {

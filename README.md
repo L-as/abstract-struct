@@ -41,7 +41,7 @@ pub struct MyAwesomeStruct<T, U, V> where
 }
 
 #[some_more_attribs]
-pub unsafe trait {
+pub unsafe trait : Clone {
 	type T: {T} = T;
 	// NB: Must use &Self::T and not T
 	fn t(&self) -> &Self::T {
