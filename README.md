@@ -37,7 +37,7 @@ pub struct MyAwesomeStruct<T, U, V> where
 }
 
 #[some_more_attribs]
-pub trait {
+pub unsafe trait {
 	type T: {T} = T;
 	// NB: Must use &Self::T and not T
 	fn t(&self) -> &Self::T {
@@ -57,3 +57,7 @@ You can now use these types as you would use all other types.
 The syntax `{T}` in the associated type declaration is a shortcut for the
 constraints specified on the generic type parameter `T`.
 This syntax can currently only be used in associated type declarations.
+
+### Unsafe traits
+If you specify `unsafe`, then the trait will be an unsafe trait, which will
+prevent other types from implementing it unless it's an `unsafe impl`.
