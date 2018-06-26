@@ -25,7 +25,7 @@ There are thorough examples in the examples directory in the repository.
 ```rust
 extern crate abstract_struct;
 
-use abstract_struct::abstract_struct;
+use abstract_struct::{abstract_struct, abstract_struct_debug};
 
 trait A {fn a(&self) {}}
 trait B {fn b(&self) {}}
@@ -34,6 +34,7 @@ trait D {fn d(&self) {}}
 trait E {fn e(&self) {}}
 trait F {fn f(&self) {}}
 
+// use abstract_struct_debug if you want to inspect the generated code.
 #[abstract_struct]
 pub struct MyAwesomeStruct<T: A + B, U: C + D, V: E + F>
 {
