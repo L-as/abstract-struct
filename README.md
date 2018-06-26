@@ -23,12 +23,16 @@ haven't been stabilized yet.
 There are thorough examples in the examples directory in the repository.
 
 ```rust
-trait A {fn a() {}}
-trait B {fn b() {}}
-trait C {fn c() {}}
-trait D {fn d() {}}
-trait E {fn e() {}}
-trait F {fn f() {}}
+extern crate abstract_struct;
+
+use abstract_struct::abstract_struct;
+
+trait A {fn a(&self) {}}
+trait B {fn b(&self) {}}
+trait C {fn c(&self) {}}
+trait D {fn d(&self) {}}
+trait E {fn e(&self) {}}
+trait F {fn f(&self) {}}
 
 #[abstract_struct]
 pub struct MyAwesomeStruct<T: A + B, U: C + D, V: E + F>
@@ -38,7 +42,7 @@ pub struct MyAwesomeStruct<T: A + B, U: C + D, V: E + F>
 	v: V,
 }
 
-fn use_awesome_struct<U: C + D + std::fmt::Debug>(s: impl MyAwesomeStruct<U = U>) {
+fn use_awesome_struct<U: C + D + std::fmt::Debug>(s: impl MyAwesomeStructAbstract<U = U>) {
 	s.t.a();
 	s.t.b();
 	println!("{:?}", s.u);
