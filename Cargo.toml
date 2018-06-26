@@ -2,7 +2,7 @@ cargo-features = ["edition"]
 
 [package]
 name        = "abstract-struct"
-version     = "1.0.0"
+version     = "0.2.0"
 authors     = ["Las <las@protonmail.ch>"]
 license     = "MPL-2.0"
 readme      = "README.md"
