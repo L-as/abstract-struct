@@ -71,3 +71,11 @@ fn main() {
 This creates a public struct called MyAwesomeStruct and a corresponding trait
 called MyAwesomeStructAbstract, which is also public.
 The publicity of the trait matches the publicity of the struct.
+
+## Arguments to pass to macro
+
+You can do `#[abstract_struct(nowrap)]`
+to not generate the `fn wrap(self) -> Wrapper<Self>` method automatically.
+
+You can do `#[abstract_struct(wrap = mywrap)]`
+to rename the name of the wrap method to the passed in name.

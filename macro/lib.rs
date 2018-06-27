@@ -1,21 +1,43 @@
 #![feature(proc_macro)]
+#![feature(label_break_value)]
 
 #![recursion_limit="128"]
-
-extern crate proc_macro;
-extern crate proc_macro2;
-extern crate syn;
-//extern crate itertools;
 
 #[macro_use]
 extern crate quote;
 
-use proc_macro2::TokenStream;
-use syn::{ItemStruct, Ident, punctuated::Punctuated};
+use proc_macro;
+use proc_macro2::{TokenStream, TokenTree, Ident, Span};
+use syn::{ItemStruct, punctuated::Punctuated};
+use matches2::{unwrap_match, assert_matches};
 
 /// The main macro, check out the README for more information.
 #[proc_macro_attribute]
-pub fn abstract_struct(_: proc_macro::TokenStream, input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn abstract_struct(args: proc_macro::TokenStream, input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let wrap_method_name: Option<Ident> = 'wrap_method_name: {
+		let args: TokenStream = args.into();
+		let mut iter = args.into_iter();
+		let action = match iter.next() {
+			Some(TokenTree::Ident(i)) => i.to_string(),
+			None => break 'wrap_method_name Some(Ident::new("wrap", Span::call_site())),
+			_ => panic!("Expected an identifier first inside the parentheses!")
+		};
+
+		match action.as_ref() {
+			"nowrap" => {
+				assert_matches!(iter.next(), None, "There should be nothing after `nowrap`!");
+				None
+			},
+			"wrap" => {
+				assert_matches!(iter.next(), Some(TokenTree::Punct(ref p)) if p.as_char() == '=',
+					"Expected a '=' after `wrap`!");
+				Some(unwrap_match!(iter.next(), Some(TokenTree::Ident(i)) => i,
+					"Expected an identifier that should be the name of the wrap method"))
+			},
+			_ => panic!("Invalid argument!")
+		}
+	};
+
 	let input: ItemStruct = syn::parse(input).unwrap();
 
 	let vis = &input.vis;
@@ -59,13 +81,25 @@ pub fn abstract_struct(_: proc_macro::TokenStream, input: proc_macro::TokenStrea
 		        w.0
 		    }
 		}
+	};
 
-		#[allow(dead_code)]
-		impl #impl_generics #ident #ty_generics {
-			fn wrap(self) -> abstract_struct::Wrapper<Self> {
-				abstract_struct::Wrapper(self)
+	let expanded = if let Some(wrap_method_name) = wrap_method_name {
+		quote! {
+			#expanded
+
+			#[allow(dead_code)]
+			impl #impl_generics #ident #ty_generics {
+				fn #wrap_method_name(self) -> abstract_struct::Wrapper<Self> {
+					abstract_struct::Wrapper(self)
+				}
 			}
 		}
+	} else {
+		expanded
+	};
+
+	let expanded = quote! {
+		#expanded
 
 		#vis trait #trait_ident<#lifetimes> : std::ops::Deref<Target = #ident<#lifetime_arguments #assoc_ty_args>> + std::convert::Into<#ident<#lifetime_arguments #assoc_ty_args>> {
 			#assoc_ty_decl
