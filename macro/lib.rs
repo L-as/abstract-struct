@@ -60,6 +60,7 @@ pub fn abstract_struct(_: proc_macro::TokenStream, input: proc_macro::TokenStrea
 		    }
 		}
 
+		#[allow(dead_code)]
 		impl #impl_generics #ident #ty_generics {
 			fn wrap(self) -> abstract_struct::Wrapper<Self> {
 				abstract_struct::Wrapper(self)
