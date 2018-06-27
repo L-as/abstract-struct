@@ -27,12 +27,19 @@ extern crate abstract_struct;
 
 use abstract_struct::{abstract_struct, abstract_struct_debug};
 
-trait A {fn a(&self) {}}
-trait B {fn b(&self) {}}
-trait C {fn c(&self) {}}
-trait D {fn d(&self) {}}
-trait E {fn e(&self) {}}
-trait F {fn f(&self) {}}
+pub trait A {fn a(&self) {}}
+pub trait B: Sized {fn b(self) {}}
+pub trait C {fn c(&self) {}}
+pub trait D {fn d(&self) {}}
+pub trait E {fn e(&self) {}}
+pub trait F {fn f(&self) {}}
+
+impl A for usize {fn a(&self) {}}
+impl B for usize {fn b(self) {}}
+impl C for usize {fn c(&self) {}}
+impl D for usize {fn d(&self) {}}
+impl E for usize {fn e(&self) {}}
+impl F for usize {fn f(&self) {}}
 
 // use abstract_struct_debug if you want to inspect the generated code.
 #[abstract_struct]
@@ -44,9 +51,20 @@ pub struct MyAwesomeStruct<T: A + B, U: C + D, V: E + F>
 }
 
 fn use_awesome_struct<U: C + D + std::fmt::Debug>(s: impl MyAwesomeStructAbstract<U = U>) {
-	s.t.a();
-	s.t.b();
 	println!("{:?}", s.u);
+	s.t.a();
+	// `into` converts from `impl StructAbstract` to `Struct`
+	s.into().t.b();
+}
+
+fn main() {
+	let s = MyAwesomeStruct {
+		t: 0,
+		u: 1,
+		v: 2,
+	}.wrap();
+	
+	use_awesome_struct(s);
 }
 ```
 
